@@ -1,285 +1,701 @@
-
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Jogo de Penney — Moeda Euro</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Fira+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-  .coin { display:inline-flex;align-items:center;justify-content:center;border-radius:50%;border:2px solid var(--color-border-secondary);overflow:hidden;flex-shrink:0; }
-  .coin.C { border-color:#B8860B; }
-  .coin.N { border-color:#006600; }
-  .coin.neutral { background:var(--color-background-secondary);color:var(--color-text-secondary);font-size:13px; }
-  .seq-btn { border-radius:50%;border:2px solid var(--color-border-secondary);background:var(--color-background-secondary);cursor:pointer;transition:all .15s;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;padding:0; }
-  .seq-btn.C { border-color:#B8860B; }
-  .seq-btn.N { border-color:#006600; }
-  .tab { padding:8px 18px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:var(--color-background-secondary);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s; }
-  .tab.active { background:#185FA5;color:#fff;border-color:#185FA5; }
-  .btn { padding:9px 22px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-secondary);background:var(--color-background-primary);font-size:13px;font-weight:500;cursor:pointer;transition:background .1s; }
-  .btn:hover { background:var(--color-background-secondary); }
-  .btn:active { transform:scale(0.98); }
-  .btn:disabled { opacity:.4;cursor:not-allowed; }
-  .btn.primary { background:#185FA5;color:#fff;border-color:#185FA5; }
-  .btn.primary:hover { background:#0C447C; }
-  .win-banner { padding:10px 18px;border-radius:var(--border-radius-md);font-size:14px;font-weight:500;text-align:center;margin-bottom:10px; }
-  .win-p { background:#EAF3DE;color:#1E8449; }
-  .win-c { background:#FAECE7;color:#993C1D; }
-  .stat { background:var(--color-background-secondary);border-radius:var(--border-radius-md);padding:10px 14px;text-align:center; }
-  .stat-n { font-size:20px;font-weight:500; }
-  .stat-l { font-size:11px;color:var(--color-text-secondary);margin-top:2px; }
-  .history-wrap { display:flex;flex-wrap:wrap;gap:3px;max-height:72px;overflow-y:auto; }
-  .phase-lbl { font-size:11px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px; }
-  .legend { display:flex;gap:16px;font-size:12px;color:var(--color-text-secondary);align-items:center;flex-wrap:wrap;margin-bottom:12px; }
-  .card { background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:10px; }
-  .freq-bar-bg { flex:1;height:7px;border-radius:4px;background:var(--color-background-secondary);overflow:hidden; }
-  .freq-bar { height:100%;border-radius:4px;transition:width .4s; }
-  table.cmp { width:100%;border-collapse:collapse;font-size:13px; }
-  table.cmp th { background:#185FA5;color:#fff;padding:6px 10px;font-weight:500; }
-  table.cmp td { padding:6px 10px;border-bottom:0.5px solid var(--color-border-tertiary); }
-  table.cmp tr:nth-child(even) td { background:var(--color-background-secondary); }
-  .badge { display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500; }
-  .badge.win { background:#EAF3DE;color:#1E8449; }
-  .badge.lose { background:#FAECE7;color:#993C1D; }
-  .badge.eq { background:var(--color-background-secondary);color:var(--color-text-secondary); }
-</style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-<!-- SVG symbols for the two coin faces -->
+  :root {
+    --blue:    #1A5FB4;
+    --blue-lt: #E8F0FB;
+    --blue-md: #C2D5F5;
+    --gold:    #C9920A;
+    --gold-lt: #FEF6E0;
+    --green:   #1C7F3A;
+    --green-lt:#E4F5EA;
+    --red:     #C0392B;
+    --red-lt:  #FDECEA;
+    --bg:      #F2F4F8;
+    --surface: #FFFFFF;
+    --border:  #DDE3EE;
+    --text:    #1A1E2E;
+    --muted:   #6B748A;
+    --radius:  14px;
+    --shadow:  0 2px 10px rgba(0,0,0,.08);
+  }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0;
+    font-size: 15px;
+  }
+
+  /* ── Header ── */
+  .app-header {
+    background: var(--blue);
+    color: #fff;
+    padding: 16px 18px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .app-header .logo {
+    width: 38px; height: 38px;
+    background: #fff2;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+  }
+  .app-header h1 { font-size: 18px; font-weight: 800; line-height: 1.1; }
+  .app-header p  { font-size: 11px; opacity: .75; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; }
+
+  /* ── Tabs ── */
+  .tabs {
+    display: flex;
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab-btn {
+    flex: 1; min-width: 90px;
+    padding: 13px 8px 11px;
+    border: none; background: none;
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px; font-weight: 700;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    transition: all .18s;
+    white-space: nowrap;
+  }
+  .tab-btn.active {
+    color: var(--blue);
+    border-bottom-color: var(--blue);
+  }
+  .tab-icon { display: block; font-size: 18px; margin-bottom: 3px; }
+
+  /* ── Pages ── */
+  .page { display: none; padding: 14px; max-width: 520px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* ── Section box (the main "caixa" for alunos) ── */
+  .box {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 12px;
+    box-shadow: var(--shadow);
+  }
+  .box-title {
+    font-size: 11px; font-weight: 800;
+    text-transform: uppercase; letter-spacing: .08em;
+    color: var(--blue);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1.5px solid var(--blue-lt);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .box-title span { font-size: 16px; }
+
+  /* ── Legend ── */
+  .legend {
+    display: flex; gap: 12px; flex-wrap: wrap;
+    padding: 12px 14px;
+    background: var(--gold-lt);
+    border: 1.5px solid #F0C050;
+    border-radius: var(--radius);
+    margin-bottom: 12px;
+  }
+  .legend-item { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; }
+
+  /* ── Coins ── */
+  .coin { display:inline-flex;align-items:center;justify-content:center;border-radius:50%;overflow:hidden;flex-shrink:0; }
+  .coin.C { border: 2.5px solid #B8860B; }
+  .coin.N { border: 2.5px solid #006600; }
+  .coin.neutral { background: var(--bg); color: var(--muted); font-size: 14px; border: 2px dashed var(--border); }
+
+  /* ── Seq buttons ── */
+  .seq-row { display: flex; gap: 10px; align-items: center; }
+  .seq-btn {
+    border-radius: 50%; border: 2.5px solid var(--border);
+    background: var(--bg); cursor: pointer;
+    transition: transform .12s, box-shadow .12s;
+    overflow: hidden;
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 0; width: 52px; height: 52px;
+    box-shadow: 0 2px 6px rgba(0,0,0,.08);
+  }
+  .seq-btn:active { transform: scale(0.92); }
+  .seq-btn.C { border-color: #B8860B; box-shadow: 0 0 0 3px #F0C05030; }
+  .seq-btn.N { border-color: #006600; box-shadow: 0 0 0 3px #00660020; }
+  .seq-hint { font-size: 12px; color: var(--muted); font-weight: 600; margin-top: 6px; }
+
+  /* ── Buttons ── */
+  .btn {
+    padding: 11px 20px; border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px; font-weight: 700;
+    cursor: pointer; transition: all .15s;
+    color: var(--text);
+  }
+  .btn:active { transform: scale(0.97); }
+  .btn:disabled { opacity: .35; cursor: not-allowed; }
+  .btn-primary {
+    background: var(--blue); color: #fff; border-color: var(--blue);
+  }
+  .btn-primary:hover:not(:disabled) { background: #1450A0; }
+  .btn-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* ── VS display ── */
+  .vs-box {
+    background: var(--blue-lt);
+    border: 1.5px solid var(--blue-md);
+    border-radius: var(--radius);
+    padding: 14px;
+    margin-bottom: 10px;
+  }
+  .vs-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .vs-player-lbl { font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--blue); margin-bottom: 5px; }
+  .vs-sep { font-size: 20px; font-weight: 900; color: var(--muted); padding: 0 4px; }
+  .prob-pill {
+    background: #fff; border: 1px solid var(--blue-md);
+    border-radius: 20px; padding: 4px 12px;
+    font-size: 12px; font-weight: 700; color: var(--blue);
+    margin-top: 6px; display: inline-block;
+  }
+
+  /* ── History ── */
+  .hist-wrap {
+    display: flex; flex-wrap: wrap; gap: 4px;
+    max-height: 76px; overflow-y: auto;
+    padding: 8px; background: var(--bg);
+    border-radius: 8px;
+  }
+  .last3-wrap { display: flex; gap: 8px; align-items: center; padding: 8px 10px; background: var(--bg); border-radius: 8px; }
+
+  /* ── Banner ── */
+  .banner {
+    padding: 12px 16px; border-radius: 10px;
+    font-size: 15px; font-weight: 800; text-align: center;
+    margin-bottom: 10px;
+  }
+  .banner-win  { background: var(--green-lt); color: var(--green); border: 1.5px solid #7DD0A0; }
+  .banner-lose { background: var(--red-lt);   color: var(--red);   border: 1.5px solid #F0A0A0; }
+  .banner-tie  { background: var(--bg);       color: var(--muted); border: 1.5px solid var(--border); }
+
+  /* ── Stats grid ── */
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stat-card {
+    background: var(--bg); border-radius: 10px;
+    padding: 12px 8px; text-align: center;
+    border: 1px solid var(--border);
+  }
+  .stat-num { font-size: 24px; font-weight: 800; color: var(--blue); font-family: 'Fira Mono', monospace; }
+  .stat-lbl { font-size: 11px; color: var(--muted); font-weight: 700; margin-top: 2px; }
+
+  /* ── Freq bars ── */
+  .bar-wrap { margin-bottom: 10px; }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 12px; font-weight: 700; color: var(--muted); margin-bottom: 4px; }
+  .bar-bg { height: 10px; border-radius: 5px; background: var(--bg); overflow: hidden; border: 1px solid var(--border); }
+  .bar-fill { height: 100%; border-radius: 5px; transition: width .5s cubic-bezier(.4,0,.2,1); }
+
+  /* ── Table ── */
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; border-radius: 10px; overflow: hidden; }
+  .data-table th { background: var(--blue); color: #fff; padding: 8px 10px; font-weight: 700; font-size: 12px; text-align: left; }
+  .data-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+  .data-table tr:last-child td { border-bottom: none; }
+  .data-table tr:nth-child(even) td { background: var(--blue-lt); }
+
+  /* ── Badge ── */
+  .badge { display: inline-block; padding: 3px 10px; border-radius: 20px; font-size: 11px; font-weight: 800; }
+  .badge-win  { background: var(--green-lt); color: var(--green); }
+  .badge-lose { background: var(--red-lt);   color: var(--red); }
+  .badge-eq   { background: var(--bg);       color: var(--muted); border: 1px solid var(--border); }
+
+  /* ── Verdict box ── */
+  .verdict {
+    background: var(--gold-lt); border: 1.5px solid #F0C050;
+    border-radius: 10px; padding: 12px 14px;
+    font-size: 13px; font-weight: 700; margin-top: 10px;
+    line-height: 1.5;
+  }
+
+  /* ── Phase label ── */
+  .phase-lbl { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<!-- SVG symbols for coin faces -->
 <svg width="0" height="0" style="position:absolute">
 <defs>
-  <!-- Face Comum: símbolo € dourado -->
   <symbol id="face-C" viewBox="0 0 40 40">
     <circle cx="20" cy="20" r="20" fill="#F5E6B0"/>
     <circle cx="20" cy="20" r="18" fill="#F0D060"/>
     <circle cx="20" cy="20" r="15" fill="#E8C832"/>
-    <!-- € symbol -->
     <text x="20" y="27" text-anchor="middle" font-size="20" font-weight="900" fill="#8B6000" font-family="Georgia,serif">€</text>
-    <!-- rim -->
     <circle cx="20" cy="20" r="19" fill="none" stroke="#B8860B" stroke-width="1.5"/>
   </symbol>
-
-  <!-- Face Nacional: bandeira de Portugal simplificada -->
   <symbol id="face-N" viewBox="0 0 40 40">
-    <clipPath id="circ-clip">
-      <circle cx="20" cy="20" r="19"/>
-    </clipPath>
-    <!-- verde -->
+    <clipPath id="circ-clip"><circle cx="20" cy="20" r="19"/></clipPath>
     <rect x="0" y="0" width="16" height="40" fill="#006600" clip-path="url(#circ-clip)"/>
-    <!-- vermelho -->
     <rect x="16" y="0" width="24" height="40" fill="#CC0000" clip-path="url(#circ-clip)"/>
-    <!-- escudo simplificado (círculo branco + 5 escudetes azuis) -->
     <circle cx="16" cy="20" r="7" fill="#FFD700" clip-path="url(#circ-clip)"/>
     <circle cx="16" cy="20" r="5.5" fill="#FFFFFF" clip-path="url(#circ-clip)"/>
-    <!-- 5 escudetes em cruz -->
     <rect x="14" y="15.5" width="4" height="3" rx="0.5" fill="#003399" clip-path="url(#circ-clip)"/>
     <rect x="14" y="21.5" width="4" height="3" rx="0.5" fill="#003399" clip-path="url(#circ-clip)"/>
     <rect x="11" y="18.5" width="3" height="3" rx="0.5" fill="#003399" clip-path="url(#circ-clip)"/>
     <rect x="18" y="18.5" width="3" height="3" rx="0.5" fill="#003399" clip-path="url(#circ-clip)"/>
     <rect x="14" y="18.5" width="4" height="3" rx="0.5" fill="#003399" clip-path="url(#circ-clip)"/>
-    <!-- rim -->
     <circle cx="20" cy="20" r="19" fill="none" stroke="#004400" stroke-width="1.5"/>
   </symbol>
 </defs>
 </svg>
 
-<div style="padding:.75rem 0">
+<!-- Header -->
+<header class="app-header">
+  <div class="logo">🪙</div>
+  <div>
+    <h1>Jogo de Penney</h1>
+    <p>Moeda Euro · Probabilidades</p>
+  </div>
+</header>
 
+<!-- Tabs -->
+<nav class="tabs">
+  <button class="tab-btn active" onclick="setMode('jogo')">
+    <span class="tab-icon">🎮</span>Modo Jogo
+  </button>
+  <button class="tab-btn" onclick="setMode('inv')">
+    <span class="tab-icon">🔬</span>Investigação
+  </button>
+  <button class="tab-btn" onclick="setMode('cmp')">
+    <span class="tab-icon">📊</span>Comparador
+  </button>
+</nav>
+
+<!-- ════ MODO JOGO ════ -->
+<div id="page-jogo" class="page active">
+
+  <!-- Legenda -->
   <div class="legend">
-    <div style="display:flex;align-items:center;gap:7px">
-      <div style="width:28px;height:28px;border-radius:50%;overflow:hidden;border:2px solid #B8860B;flex-shrink:0"><svg width="28" height="28"><use href="#face-C"/></svg></div>
+    <div class="legend-item">
+      <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;border:2.5px solid #B8860B;flex-shrink:0"><svg width="30" height="30"><use href="#face-C"/></svg></div>
       <span><strong>C</strong> — Face comum (€)</span>
     </div>
-    <div style="display:flex;align-items:center;gap:7px">
-      <div style="width:28px;height:28px;border-radius:50%;overflow:hidden;border:2px solid #006600;flex-shrink:0"><svg width="28" height="28"><use href="#face-N"/></svg></div>
+    <div class="legend-item">
+      <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;border:2.5px solid #006600;flex-shrink:0"><svg width="30" height="30"><use href="#face-N"/></svg></div>
       <span><strong>N</strong> — Face nacional 🇵🇹</span>
     </div>
   </div>
 
-  <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
-    <button class="tab active" onclick="setMode('jogo')">Modo Jogo</button>
-    <button class="tab" onclick="setMode('inv')">Modo Investigação</button>
-    <button class="tab" onclick="setMode('cmp')">Comparador de Sequências</button>
-  </div>
-
-  <!-- ═══ MODO JOGO ═══ -->
-  <div id="mode-jogo">
-    <div id="jg-choose" class="card">
-      <div class="phase-lbl">Fase 1 — escolhe a tua sequência (3 lançamentos)</div>
-      <div style="display:flex;gap:8px;margin-bottom:10px">
-        <button class="seq-btn" style="width:46px;height:46px" id="jb0" onclick="jToggle(0)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-        <button class="seq-btn" style="width:46px;height:46px" id="jb1" onclick="jToggle(1)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-        <button class="seq-btn" style="width:46px;height:46px" id="jb2" onclick="jToggle(2)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-      </div>
-      <div style="font-size:12px;color:var(--color-text-secondary);margin-bottom:12px">Clica para alternar entre C (€) e N (🇵🇹)</div>
-      <button class="btn primary" onclick="jConfirm()" id="jconfirm" disabled>Confirmar →</button>
+  <!-- Fase 1: escolha -->
+  <div id="jg-choose" class="box">
+    <div class="box-title"><span>1️⃣</span> Escolhe a tua sequência</div>
+    <p style="font-size:13px;color:var(--muted);font-weight:600;margin-bottom:12px">Toca em cada moeda para a alternar entre C e N</p>
+    <div class="seq-row" style="margin-bottom:8px">
+      <button class="seq-btn" id="jb0" onclick="jToggle(0)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+      <button class="seq-btn" id="jb1" onclick="jToggle(1)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+      <button class="seq-btn" id="jb2" onclick="jToggle(2)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+      <span style="font-size:11px;color:var(--muted);font-weight:700;margin-left:4px">← toca aqui</span>
     </div>
-    <div id="jg-vs" style="display:none" class="card">
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px">
-        <div><div class="phase-lbl">Tu</div><div style="display:flex;gap:5px" id="jg-pseq"></div></div>
-        <div style="font-size:18px;color:var(--color-text-tertiary)">vs</div>
-        <div><div class="phase-lbl">Computador</div><div style="display:flex;gap:5px" id="jg-cseq"></div></div>
-        <div id="jg-prob" style="font-size:12px;color:var(--color-text-secondary);margin-left:auto"></div>
-      </div>
-      <div style="margin-bottom:10px"><div class="phase-lbl">Histórico</div><div class="history-wrap" id="jg-hist"></div></div>
-      <div style="margin-bottom:10px"><div class="phase-lbl">Últimos 3</div><div style="display:flex;gap:5px" id="jg-last3"></div></div>
-      <div id="jg-banner" style="display:none"></div>
-      <div style="display:flex;gap:7px;flex-wrap:wrap">
-        <button class="btn" onclick="jToss()" id="jg-toss">Lançar 🪙</button>
-        <button class="btn" onclick="jAuto()" id="jg-auto">Automático</button>
-        <button class="btn" onclick="jReset()" id="jg-reset" style="display:none">Nova ronda</button>
-      </div>
-    </div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px">
-      <div class="stat"><div class="stat-n" id="jg-sw">0</div><div class="stat-l">Vitórias tuas</div></div>
-      <div class="stat"><div class="stat-n" id="jg-cw">0</div><div class="stat-l">Vitórias PC</div></div>
-      <div class="stat"><div class="stat-n" id="jg-tot">0</div><div class="stat-l">Lançamentos</div></div>
+    <div style="margin-top:12px">
+      <button class="btn btn-primary" onclick="jConfirm()" id="jconfirm" disabled>Confirmar e jogar →</button>
     </div>
   </div>
 
-  <!-- ═══ MODO INVESTIGAÇÃO ═══ -->
-  <div id="mode-inv" style="display:none">
-    <div class="card">
-      <div style="font-size:13px;font-weight:500;margin-bottom:10px">Configura o par de sequências a investigar</div>
-      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:12px">
-        <div><div class="phase-lbl">Jogador A</div><div style="display:flex;gap:6px">
-          <button class="seq-btn" style="width:46px;height:46px" id="ia0" onclick="invToggle('a',0)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-          <button class="seq-btn" style="width:46px;height:46px" id="ia1" onclick="invToggle('a',1)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-          <button class="seq-btn" style="width:46px;height:46px" id="ia2" onclick="invToggle('a',2)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-        </div></div>
-        <div style="font-size:16px;color:var(--color-text-tertiary);margin-top:14px">vs</div>
-        <div><div class="phase-lbl">Jogador B</div><div style="display:flex;gap:6px">
-          <button class="seq-btn" style="width:46px;height:46px" id="ib0" onclick="invToggle('b',0)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-          <button class="seq-btn" style="width:46px;height:46px" id="ib1" onclick="invToggle('b',1)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-          <button class="seq-btn" style="width:46px;height:46px" id="ib2" onclick="invToggle('b',2)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-        </div></div>
-        <div style="margin-top:14px"><button class="btn primary" onclick="invStart()" id="inv-start" disabled>Iniciar</button></div>
-      </div>
-    </div>
-    <div id="inv-run" style="display:none">
-      <div class="card">
-        <div style="margin-bottom:8px"><div class="phase-lbl">Histórico</div><div class="history-wrap" id="inv-hist"></div></div>
-        <div style="margin-bottom:8px"><div class="phase-lbl">Últimos 3</div><div style="display:flex;gap:5px" id="inv-last3"></div></div>
-        <div id="inv-banner" style="display:none;margin-bottom:8px"></div>
-        <div style="display:flex;gap:7px;flex-wrap:wrap">
-          <button class="btn" onclick="invToss()" id="inv-toss">Lançar 🪙</button>
-          <button class="btn" onclick="invAuto()" id="inv-auto">Automático</button>
-          <button class="btn" onclick="invNext()" id="inv-next" style="display:none">Próxima ronda</button>
-          <button class="btn" onclick="invReset()" style="margin-left:auto">Reiniciar</button>
-        </div>
-      </div>
-      <div class="card">
-        <div style="font-size:13px;font-weight:500;margin-bottom:10px">Frequências acumuladas</div>
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px">
-          <div class="stat"><div class="stat-n" id="inv-rnd">0</div><div class="stat-l">Rondas</div></div>
-          <div class="stat"><div class="stat-n" id="inv-aw">0</div><div class="stat-l">Vitórias A</div></div>
-          <div class="stat"><div class="stat-n" id="inv-bw">0</div><div class="stat-l">Vitórias B</div></div>
-          <div class="stat"><div class="stat-n" id="inv-bpct">—</div><div class="stat-l">Freq. B (%)</div></div>
-        </div>
-        <div style="margin-bottom:6px">
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-text-secondary);margin-bottom:3px"><span>A</span><span id="inv-apct-lbl">—</span></div>
-          <div class="freq-bar-bg"><div class="freq-bar" id="inv-abar" style="width:50%;background:#B8860B"></div></div>
-        </div>
+  <!-- Fase 2: jogo -->
+  <div id="jg-vs" style="display:none">
+
+    <div class="vs-box">
+      <div class="vs-row">
         <div>
-          <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--color-text-secondary);margin-bottom:3px"><span>B</span><span id="inv-bpct-lbl">—</span></div>
-          <div class="freq-bar-bg"><div class="freq-bar" id="inv-bbar" style="width:50%;background:#006600"></div></div>
+          <div class="vs-player-lbl">🧑 Tu</div>
+          <div style="display:flex;gap:6px" id="jg-pseq"></div>
         </div>
-        <div id="inv-snapshots" style="margin-top:12px"></div>
+        <div class="vs-sep">vs</div>
+        <div>
+          <div class="vs-player-lbl">💻 Computador</div>
+          <div style="display:flex;gap:6px" id="jg-cseq"></div>
+        </div>
+      </div>
+      <div id="jg-prob" class="prob-pill"></div>
+    </div>
+
+    <div class="box">
+      <div class="box-title"><span>🎲</span> Lançamentos</div>
+
+      <div style="margin-bottom:10px">
+        <div class="phase-lbl">Últimas 3 moedas</div>
+        <div class="last3-wrap" id="jg-last3"></div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <div class="phase-lbl">Histórico completo</div>
+        <div class="hist-wrap" id="jg-hist"></div>
+      </div>
+
+      <div id="jg-banner" style="display:none"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="jToss()" id="jg-toss">Lançar 🪙</button>
+        <button class="btn" onclick="jAuto()" id="jg-auto">Automático ⚡</button>
+        <button class="btn" onclick="jReset()" id="jg-reset" style="display:none">Nova ronda 🔄</button>
       </div>
     </div>
+
   </div>
 
-  <!-- ═══ COMPARADOR ═══ -->
-  <div id="mode-cmp" style="display:none">
-    <div class="card">
-      <div style="font-size:13px;font-weight:500;margin-bottom:8px">Simula 200 rondas para qualquer par e compara</div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:10px">
-        <div><div class="phase-lbl">Sequência A</div><div style="display:flex;gap:5px">
-          <button class="seq-btn" style="width:46px;height:46px" id="ca0" onclick="cmpToggle('a',0)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-          <button class="seq-btn" style="width:46px;height:46px" id="ca1" onclick="cmpToggle('a',1)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-          <button class="seq-btn" style="width:46px;height:46px" id="ca2" onclick="cmpToggle('a',2)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-        </div></div>
-        <div style="font-size:16px;color:var(--color-text-tertiary);margin-top:14px">vs</div>
-        <div><div class="phase-lbl">Sequência B</div><div style="display:flex;gap:5px">
-          <button class="seq-btn" style="width:46px;height:46px" id="cb0" onclick="cmpToggle('b',0)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-          <button class="seq-btn" style="width:46px;height:46px" id="cb1" onclick="cmpToggle('b',1)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-          <button class="seq-btn" style="width:46px;height:46px" id="cb2" onclick="cmpToggle('b',2)"><span style="font-size:12px;color:var(--color-text-secondary)">?</span></button>
-        </div></div>
-        <div style="margin-top:14px"><button class="btn primary" onclick="cmpRun()" id="cmp-run" disabled>Simular 200 rondas</button></div>
+  <!-- Marcador -->
+  <div class="box">
+    <div class="box-title"><span>🏆</span> Marcador</div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-num" id="jg-sw">0</div>
+        <div class="stat-lbl">Vitórias tuas</div>
       </div>
-    </div>
-    <div id="cmp-result" style="display:none" class="card">
-      <div style="font-size:13px;font-weight:500;margin-bottom:10px" id="cmp-title"></div>
-      <table class="cmp"><thead><tr><th>Rondas</th><th>Vitórias A</th><th>Vitórias B</th><th>Freq. A</th><th>Freq. B</th><th>Vantagem</th></tr></thead><tbody id="cmp-tbody"></tbody></table>
-      <div id="cmp-verdict" style="margin-top:10px;font-size:13px;padding:10px;border-radius:var(--border-radius-md);background:var(--color-background-secondary)"></div>
+      <div class="stat-card">
+        <div class="stat-num" id="jg-cw">0</div>
+        <div class="stat-lbl">Vitórias PC</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-num" id="jg-tot">0</div>
+        <div class="stat-lbl">Lançamentos</div>
+      </div>
     </div>
   </div>
 
 </div>
 
+<!-- ════ MODO INVESTIGAÇÃO ════ -->
+<div id="page-inv" class="page">
+
+  <div class="box">
+    <div class="box-title"><span>⚙️</span> Configura as sequências</div>
+    <p style="font-size:13px;color:var(--muted);font-weight:600;margin-bottom:14px">Escolhe duas sequências diferentes e compara quem ganha mais rondas</p>
+
+    <div style="margin-bottom:12px">
+      <div class="phase-lbl">Jogador A</div>
+      <div class="seq-row">
+        <button class="seq-btn" id="ia0" onclick="invToggle('a',0)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+        <button class="seq-btn" id="ia1" onclick="invToggle('a',1)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+        <button class="seq-btn" id="ia2" onclick="invToggle('a',2)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div class="phase-lbl">Jogador B</div>
+      <div class="seq-row">
+        <button class="seq-btn" id="ib0" onclick="invToggle('b',0)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+        <button class="seq-btn" id="ib1" onclick="invToggle('b',1)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+        <button class="seq-btn" id="ib2" onclick="invToggle('b',2)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="invStart()" id="inv-start" disabled>Iniciar investigação →</button>
+  </div>
+
+  <div id="inv-run" style="display:none">
+
+    <div class="box">
+      <div class="box-title"><span>🎲</span> A decorrer</div>
+
+      <div style="margin-bottom:10px">
+        <div class="phase-lbl">Últimas 3 moedas</div>
+        <div class="last3-wrap" id="inv-last3"></div>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <div class="phase-lbl">Histórico</div>
+        <div class="hist-wrap" id="inv-hist"></div>
+      </div>
+
+      <div id="inv-banner" style="display:none;margin-bottom:10px"></div>
+
+      <div class="btn-row">
+        <button class="btn btn-primary" onclick="invToss()" id="inv-toss">Lançar 🪙</button>
+        <button class="btn" onclick="invAuto()" id="inv-auto">Automático ⚡</button>
+        <button class="btn" onclick="invNext()" id="inv-next" style="display:none">Próxima ronda →</button>
+        <button class="btn" onclick="invReset()" style="margin-left:auto">Reiniciar 🔄</button>
+      </div>
+    </div>
+
+    <div class="box">
+      <div class="box-title"><span>📈</span> Frequências acumuladas</div>
+
+      <div class="stats-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:14px">
+        <div class="stat-card"><div class="stat-num" id="inv-rnd">0</div><div class="stat-lbl">Rondas</div></div>
+        <div class="stat-card"><div class="stat-num" id="inv-aw">0</div><div class="stat-lbl">Vitórias A</div></div>
+        <div class="stat-card"><div class="stat-num" id="inv-bw">0</div><div class="stat-lbl">Vitórias B</div></div>
+        <div class="stat-card"><div class="stat-num" id="inv-bpct">—</div><div class="stat-lbl">Freq. B</div></div>
+      </div>
+
+      <div class="bar-wrap">
+        <div class="bar-labels"><span>Jogador A</span><span id="inv-apct-lbl">—</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="inv-abar" style="width:50%;background:#C9920A"></div></div>
+      </div>
+      <div class="bar-wrap">
+        <div class="bar-labels"><span>Jogador B</span><span id="inv-bpct-lbl">—</span></div>
+        <div class="bar-bg"><div class="bar-fill" id="inv-bbar" style="width:50%;background:#006600"></div></div>
+      </div>
+
+      <div id="inv-snapshots" style="margin-top:12px"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ════ COMPARADOR ════ -->
+<div id="page-cmp" class="page">
+
+  <div class="box">
+    <div class="box-title"><span>🔢</span> Simula 200 rondas</div>
+    <p style="font-size:13px;color:var(--muted);font-weight:600;margin-bottom:14px">Compara qualquer par de sequências com uma simulação rápida</p>
+
+    <div style="margin-bottom:12px">
+      <div class="phase-lbl">Sequência A</div>
+      <div class="seq-row">
+        <button class="seq-btn" id="ca0" onclick="cmpToggle('a',0)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+        <button class="seq-btn" id="ca1" onclick="cmpToggle('a',1)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+        <button class="seq-btn" id="ca2" onclick="cmpToggle('a',2)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px">
+      <div class="phase-lbl">Sequência B</div>
+      <div class="seq-row">
+        <button class="seq-btn" id="cb0" onclick="cmpToggle('b',0)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+        <button class="seq-btn" id="cb1" onclick="cmpToggle('b',1)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+        <button class="seq-btn" id="cb2" onclick="cmpToggle('b',2)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" onclick="cmpRun()" id="cmp-run" disabled>Simular 200 rondas 🚀</button>
+  </div>
+
+  <div id="cmp-result" style="display:none" class="box">
+    <div class="box-title"><span>📋</span> Resultados</div>
+    <div style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--blue)" id="cmp-title"></div>
+    <div style="overflow-x:auto">
+      <table class="data-table">
+        <thead><tr><th>Rondas</th><th>Vitórias A</th><th>Vitórias B</th><th>Freq. A</th><th>Freq. B</th><th>Vantagem</th></tr></thead>
+        <tbody id="cmp-tbody"></tbody>
+      </table>
+    </div>
+    <div id="cmp-verdict" class="verdict"></div>
+  </div>
+
+</div>
+
 <script>
-// Optimal responses and win probabilities (C=common €, N=national PT)
-const OPT = {'CCN':'NCC','CNC':'CCN','CNN':'CCN','NCC':'NNC','NCN':'NNC','NNC':'NNN','NNN':'NNC','CCC':'NCC'};
+const OPT  = {'CCN':'NCC','CNC':'CCN','CNN':'CCN','NCC':'NNC','NCN':'NNC','NNC':'NNN','NNN':'NNC','CCC':'NCC'};
 const PROB = {'CCN_NCC':75,'CNC_CCN':66,'CNN_CCN':75,'NCC_NNC':66,'NCN_NNC':66,'NNC_NNN':66,'NNN_NNC':75,'CCC_NCC':75};
 const FACES = ['?','C','N'];
-const SYM = {C:'face-C', N:'face-N'};
+const SYM   = {C:'face-C', N:'face-N'};
 
 function coinSVG(v, sz) {
-  sz = sz || 38;
+  sz = sz || 40;
   if (!v || v==='?') return `<div class="coin neutral" style="width:${sz}px;height:${sz}px">—</div>`;
   return `<div class="coin ${v}" style="width:${sz}px;height:${sz}px"><svg width="${sz}" height="${sz}"><use href="#${SYM[v]}"/></svg></div>`;
 }
 function setBtn(el, val) {
   el.className = 'seq-btn' + (val!=='?' ? ' '+val : '');
-  el.style.width = '46px'; el.style.height = '46px';
-  el.innerHTML = val==='?' ? '<span style="font-size:12px;color:var(--color-text-secondary)">?</span>'
-    : `<svg width="42" height="42"><use href="#${SYM[val]}"/></svg>`;
+  el.innerHTML = val==='?'
+    ? '<span style="font-size:12px;color:var(--muted);font-weight:700">?</span>'
+    : `<svg width="46" height="46"><use href="#${SYM[val]}"/></svg>`;
 }
-function renderLast3(containerId, hist) {
+function renderLast3(id, hist) {
   const s = hist.slice(-3); while(s.length<3) s.unshift(null);
-  document.getElementById(containerId).innerHTML = s.map(c => coinSVG(c,38)).join('');
+  document.getElementById(id).innerHTML = s.map(c => coinSVG(c,40)).join('');
 }
+
 function setMode(m) {
-  ['jogo','inv','cmp'].forEach((x,i)=>{
-    document.getElementById('mode-'+x).style.display = x===m?'block':'none';
-    document.querySelectorAll('.tab')[i].classList.toggle('active', x===m);
+  ['jogo','inv','cmp'].forEach((x,i) => {
+    document.getElementById('page-'+x).classList.toggle('active', x===m);
+    document.querySelectorAll('.tab-btn')[i].classList.toggle('active', x===m);
   });
 }
 
 // ══ MODO JOGO ══
 let jSeq=['?','?','?'], jComp=[], jHist=[], jOver=false, jAI=null, jW={p:0,c:0}, jTot=0;
-function jToggle(i){const c=jSeq[i]==='?'?0:jSeq[i]==='C'?1:2;jSeq[i]=FACES[(c+1)%3];setBtn(document.getElementById('jb'+i),jSeq[i]);document.getElementById('jconfirm').disabled=jSeq.includes('?');}
+
+function jToggle(i){ const c=jSeq[i]==='?'?0:jSeq[i]==='C'?1:2; jSeq[i]=FACES[(c+1)%3]; setBtn(document.getElementById('jb'+i),jSeq[i]); document.getElementById('jconfirm').disabled=jSeq.includes('?'); }
+
 function jConfirm(){
   const k=jSeq.join(''); jComp=(OPT[k]||'NCC').split('');
   document.getElementById('jg-choose').style.display='none';
   document.getElementById('jg-vs').style.display='block';
-  document.getElementById('jg-pseq').innerHTML=jSeq.map(c=>coinSVG(c,38)).join('');
-  document.getElementById('jg-cseq').innerHTML=jComp.map(c=>coinSVG(c,38)).join('');
+  document.getElementById('jg-pseq').innerHTML=jSeq.map(c=>coinSVG(c,40)).join('');
+  document.getElementById('jg-cseq').innerHTML=jComp.map(c=>coinSVG(c,40)).join('');
   const p=PROB[k+'_'+jComp.join('')]||66;
-  document.getElementById('jg-prob').textContent=`PC tem ~${p}% de probabilidade`;
+  document.getElementById('jg-prob').textContent=`O computador tem ~${p}% de probabilidade de ganhar`;
   jHist=[];jOver=false;
   document.getElementById('jg-hist').innerHTML='';
   renderLast3('jg-last3',[]);
 }
-function jCheckWin(){if(jHist.length<3)return null;const l=jHist.slice(-3).join(''),p=jSeq.join(''),c=jComp.join('');if(l===p&&l===c)return'tie';if(l===p)return'player';if(l===c)return'comp';return null;}
-function jEndGame(r){jOver=true;clearInterval(jAI);document.getElementById('jg-toss').disabled=true;document.getElementById('jg-auto').disabled=true;document.getElementById('jg-reset').style.display='inline-block';const b=document.getElementById('jg-banner');b.style.display='block';if(r==='player'){jW.p++;b.className='win-banner win-p';b.textContent='🎉 Ganhaste!';}else if(r==='comp'){jW.c++;b.className='win-banner win-c';b.textContent='💻 O computador ganhou!';}else{b.className='win-banner';b.style.background='var(--color-background-secondary)';b.textContent='Empate!';}document.getElementById('jg-sw').textContent=jW.p;document.getElementById('jg-cw').textContent=jW.c;}
-function jToss(){if(jOver)return;const c=Math.random()<.5?'C':'N';jHist.push(c);jTot++;document.getElementById('jg-tot').textContent=jTot;document.getElementById('jg-hist').innerHTML=jHist.map(v=>coinSVG(v,24)).join('');renderLast3('jg-last3',jHist);const r=jCheckWin();if(r)jEndGame(r);}
-function jAuto(){if(jOver)return;document.getElementById('jg-toss').disabled=true;document.getElementById('jg-auto').disabled=true;jAI=setInterval(()=>{jToss();if(jOver)clearInterval(jAI);},160);}
-function jReset(){clearInterval(jAI);jSeq=['?','?','?'];jComp=[];jHist=[];jOver=false;document.getElementById('jg-vs').style.display='none';document.getElementById('jg-choose').style.display='block';document.getElementById('jg-banner').style.display='none';document.getElementById('jg-toss').disabled=false;document.getElementById('jg-auto').disabled=false;document.getElementById('jg-reset').style.display='none';for(let i=0;i<3;i++)setBtn(document.getElementById('jb'+i),'?');document.getElementById('jconfirm').disabled=true;}
+
+function jCheckWin(){ if(jHist.length<3)return null; const l=jHist.slice(-3).join(''),p=jSeq.join(''),c=jComp.join(''); if(l===p&&l===c)return'tie'; if(l===p)return'player'; if(l===c)return'comp'; return null; }
+
+function jEndGame(r){
+  jOver=true; clearInterval(jAI);
+  document.getElementById('jg-toss').disabled=true;
+  document.getElementById('jg-auto').disabled=true;
+  document.getElementById('jg-reset').style.display='inline-block';
+  const b=document.getElementById('jg-banner');
+  b.style.display='block';
+  if(r==='player'){ jW.p++; b.className='banner banner-win'; b.textContent='🎉 Ganhaste esta ronda!'; }
+  else if(r==='comp'){ jW.c++; b.className='banner banner-lose'; b.textContent='💻 O computador ganhou!'; }
+  else { b.className='banner banner-tie'; b.textContent='🤝 Empate!'; }
+  document.getElementById('jg-sw').textContent=jW.p;
+  document.getElementById('jg-cw').textContent=jW.c;
+}
+
+function jToss(){
+  if(jOver)return;
+  const c=Math.random()<.5?'C':'N';
+  jHist.push(c); jTot++;
+  document.getElementById('jg-tot').textContent=jTot;
+  document.getElementById('jg-hist').innerHTML=jHist.map(v=>coinSVG(v,26)).join('');
+  renderLast3('jg-last3',jHist);
+  const r=jCheckWin(); if(r)jEndGame(r);
+}
+
+function jAuto(){
+  if(jOver)return;
+  document.getElementById('jg-toss').disabled=true;
+  document.getElementById('jg-auto').disabled=true;
+  jAI=setInterval(()=>{jToss();if(jOver)clearInterval(jAI);},160);
+}
+
+function jReset(){
+  clearInterval(jAI); jSeq=['?','?','?']; jComp=[]; jHist=[]; jOver=false;
+  document.getElementById('jg-vs').style.display='none';
+  document.getElementById('jg-choose').style.display='block';
+  document.getElementById('jg-banner').style.display='none';
+  document.getElementById('jg-toss').disabled=false;
+  document.getElementById('jg-auto').disabled=false;
+  document.getElementById('jg-reset').style.display='none';
+  for(let i=0;i<3;i++)setBtn(document.getElementById('jb'+i),'?');
+  document.getElementById('jconfirm').disabled=true;
+}
 
 // ══ MODO INVESTIGAÇÃO ══
 let invA=['?','?','?'],invB=['?','?','?'],invHist=[],invOver=false,invAI2=null,invW={a:0,b:0},invRndN=0,invSnaps=[];
 const SNAP_AT=[10,20,30,40,50,100,200];
-function invToggle(pl,i){const arr=pl==='a'?invA:invB;const c=arr[i]==='?'?0:arr[i]==='C'?1:2;arr[i]=FACES[(c+1)%3];setBtn(document.getElementById('i'+pl+i),arr[i]);document.getElementById('inv-start').disabled=invA.includes('?')||invB.includes('?')||invA.join('')===invB.join('');}
-function invStart(){document.getElementById('inv-run').style.display='block';invHist=[];invOver=false;document.getElementById('inv-hist').innerHTML='';renderLast3('inv-last3',[]);updateInvStats();}
-function invCheckWin(){if(invHist.length<3)return null;const l=invHist.slice(-3).join(''),a=invA.join(''),b=invB.join('');if(l===a&&l===b)return'tie';if(l===a)return'a';if(l===b)return'b';return null;}
-function updateInvStats(){const tot=invRndN,aw=invW.a,bw=invW.b,apct=tot?Math.round(aw/tot*100):50,bpct=tot?Math.round(bw/tot*100):50;document.getElementById('inv-rnd').textContent=tot;document.getElementById('inv-aw').textContent=aw;document.getElementById('inv-bw').textContent=bw;document.getElementById('inv-bpct').textContent=tot?bpct+'%':'—';document.getElementById('inv-abar').style.width=apct+'%';document.getElementById('inv-bbar').style.width=bpct+'%';document.getElementById('inv-apct-lbl').textContent=tot?apct+'%':'—';document.getElementById('inv-bpct-lbl').textContent=tot?bpct+'%':'—';}
-function renderSnaps(){const rows=invSnaps.map(s=>`<tr><td>${s.n}</td><td>${s.aw}</td><td>${s.bw}</td><td>${Math.round(s.aw/s.n*100)}%</td><td>${s.bpct}%</td></tr>`).join('');document.getElementById('inv-snapshots').innerHTML=rows?`<table class="cmp"><thead><tr><th>Rondas</th><th>Vitórias A</th><th>Vitórias B</th><th>Freq. A</th><th>Freq. B</th></tr></thead><tbody>${rows}</tbody></table>`:'';}
-function invEndRound(r){invOver=true;clearInterval(invAI2);document.getElementById('inv-toss').disabled=true;document.getElementById('inv-auto').disabled=true;document.getElementById('inv-next').style.display='inline-block';const b=document.getElementById('inv-banner');b.style.display='block';if(r==='a'){invW.a++;b.className='win-banner win-p';b.textContent='Jogador A ganhou esta ronda!';}else if(r==='b'){invW.b++;b.className='win-banner win-c';b.textContent='Jogador B ganhou esta ronda!';}else{b.className='win-banner';b.style.background='var(--color-background-secondary)';b.textContent='Empate!';}invRndN++;if(SNAP_AT.includes(invRndN)){const tot=invRndN,bpct=Math.round(invW.b/tot*100);invSnaps.push({n:tot,aw:invW.a,bw:invW.b,bpct});renderSnaps();}updateInvStats();}
-function invToss(){if(invOver)return;const c=Math.random()<.5?'C':'N';invHist.push(c);document.getElementById('inv-hist').innerHTML=invHist.map(v=>coinSVG(v,24)).join('');renderLast3('inv-last3',invHist);const r=invCheckWin();if(r)invEndRound(r);}
-function invAuto(){if(invOver)return;document.getElementById('inv-toss').disabled=true;document.getElementById('inv-auto').disabled=true;invAI2=setInterval(()=>{invToss();if(invOver)clearInterval(invAI2);},120);}
-function invNext(){invHist=[];invOver=false;document.getElementById('inv-banner').style.display='none';document.getElementById('inv-toss').disabled=false;document.getElementById('inv-auto').disabled=false;document.getElementById('inv-next').style.display='none';document.getElementById('inv-hist').innerHTML='';renderLast3('inv-last3',[]);}
-function invReset(){clearInterval(invAI2);invW={a:0,b:0};invRndN=0;invSnaps=[];invHist=[];invOver=false;document.getElementById('inv-run').style.display='none';document.getElementById('inv-banner').style.display='none';document.getElementById('inv-next').style.display='none';document.getElementById('inv-toss').disabled=false;document.getElementById('inv-auto').disabled=false;updateInvStats();document.getElementById('inv-snapshots').innerHTML='';}
+
+function invToggle(pl,i){ const arr=pl==='a'?invA:invB; const c=arr[i]==='?'?0:arr[i]==='C'?1:2; arr[i]=FACES[(c+1)%3]; setBtn(document.getElementById('i'+pl+i),arr[i]); document.getElementById('inv-start').disabled=invA.includes('?')||invB.includes('?')||invA.join('')===invB.join(''); }
+
+function invStart(){ document.getElementById('inv-run').style.display='block'; invHist=[]; invOver=false; document.getElementById('inv-hist').innerHTML=''; renderLast3('inv-last3',[]); updateInvStats(); }
+
+function invCheckWin(){ if(invHist.length<3)return null; const l=invHist.slice(-3).join(''),a=invA.join(''),b=invB.join(''); if(l===a&&l===b)return'tie'; if(l===a)return'a'; if(l===b)return'b'; return null; }
+
+function updateInvStats(){
+  const tot=invRndN,aw=invW.a,bw=invW.b,apct=tot?Math.round(aw/tot*100):50,bpct=tot?Math.round(bw/tot*100):50;
+  document.getElementById('inv-rnd').textContent=tot;
+  document.getElementById('inv-aw').textContent=aw;
+  document.getElementById('inv-bw').textContent=bw;
+  document.getElementById('inv-bpct').textContent=tot?bpct+'%':'—';
+  document.getElementById('inv-abar').style.width=apct+'%';
+  document.getElementById('inv-bbar').style.width=bpct+'%';
+  document.getElementById('inv-apct-lbl').textContent=tot?apct+'%':'—';
+  document.getElementById('inv-bpct-lbl').textContent=tot?bpct+'%':'—';
+}
+
+function renderSnaps(){
+  const rows=invSnaps.map(s=>`<tr><td>${s.n}</td><td>${s.aw}</td><td>${s.bw}</td><td>${Math.round(s.aw/s.n*100)}%</td><td>${s.bpct}%</td></tr>`).join('');
+  document.getElementById('inv-snapshots').innerHTML=rows?`<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Rondas</th><th>Vitórias A</th><th>Vitórias B</th><th>Freq. A</th><th>Freq. B</th></tr></thead><tbody>${rows}</tbody></table></div>`:'';
+}
+
+function invEndRound(r){
+  invOver=true; clearInterval(invAI2);
+  document.getElementById('inv-toss').disabled=true;
+  document.getElementById('inv-auto').disabled=true;
+  document.getElementById('inv-next').style.display='inline-block';
+  const b=document.getElementById('inv-banner');
+  b.style.display='block';
+  if(r==='a'){ invW.a++; b.className='banner banner-win'; b.textContent='Jogador A ganhou esta ronda! 🟡'; }
+  else if(r==='b'){ invW.b++; b.className='banner banner-lose'; b.textContent='Jogador B ganhou esta ronda! 🟢'; }
+  else{ b.className='banner banner-tie'; b.textContent='🤝 Empate!'; }
+  invRndN++;
+  if(SNAP_AT.includes(invRndN)){ const tot=invRndN,bpct=Math.round(invW.b/tot*100); invSnaps.push({n:tot,aw:invW.a,bw:invW.b,bpct}); renderSnaps(); }
+  updateInvStats();
+}
+
+function invToss(){
+  if(invOver)return;
+  const c=Math.random()<.5?'C':'N';
+  invHist.push(c);
+  document.getElementById('inv-hist').innerHTML=invHist.map(v=>coinSVG(v,26)).join('');
+  renderLast3('inv-last3',invHist);
+  const r=invCheckWin(); if(r)invEndRound(r);
+}
+
+function invAuto(){
+  if(invOver)return;
+  document.getElementById('inv-toss').disabled=true;
+  document.getElementById('inv-auto').disabled=true;
+  invAI2=setInterval(()=>{invToss();if(invOver)clearInterval(invAI2);},120);
+}
+
+function invNext(){
+  invHist=[]; invOver=false;
+  document.getElementById('inv-banner').style.display='none';
+  document.getElementById('inv-toss').disabled=false;
+  document.getElementById('inv-auto').disabled=false;
+  document.getElementById('inv-next').style.display='none';
+  document.getElementById('inv-hist').innerHTML='';
+  renderLast3('inv-last3',[]);
+}
+
+function invReset(){
+  clearInterval(invAI2); invW={a:0,b:0}; invRndN=0; invSnaps=[]; invHist=[]; invOver=false;
+  document.getElementById('inv-run').style.display='none';
+  document.getElementById('inv-banner').style.display='none';
+  document.getElementById('inv-next').style.display='none';
+  document.getElementById('inv-toss').disabled=false;
+  document.getElementById('inv-auto').disabled=false;
+  updateInvStats();
+  document.getElementById('inv-snapshots').innerHTML='';
+}
 
 // ══ COMPARADOR ══
 let cmpA=['?','?','?'],cmpB=['?','?','?'];
-function cmpToggle(pl,i){const arr=pl==='a'?cmpA:cmpB;const c=arr[i]==='?'?0:arr[i]==='C'?1:2;arr[i]=FACES[(c+1)%3];setBtn(document.getElementById('c'+pl+i),arr[i]);document.getElementById('cmp-run').disabled=cmpA.includes('?')||cmpB.includes('?')||cmpA.join('')===cmpB.join('');}
-function simRound(a,b){const hist=[];while(true){hist.push(Math.random()<.5?'C':'N');if(hist.length>=3){const l=hist.slice(-3).join(''),ak=a.join(''),bk=b.join('');if(l===ak&&l===bk)return'tie';if(l===ak)return'a';if(l===bk)return'b';}}}
-function cmpRun(){const N=[10,20,50,100,200];let wa=0,wb=0;const rows=[];N.forEach(target=>{while(wa+wb<target){const r=simRound(cmpA,cmpB);if(r==='a')wa++;else if(r==='b')wb++;}const tot=wa+wb;rows.push(`<tr><td>${tot}</td><td>${wa}</td><td>${wb}</td><td>${Math.round(wa/tot*100)}%</td><td>${Math.round(wb/tot*100)}%</td><td>${wb>wa?'<span class="badge win">B vence</span>':wa>wb?'<span class="badge lose">A vence</span>':'<span class="badge eq">Empate</span>'}</td></tr>`);});document.getElementById('cmp-title').textContent=`${cmpA.join(' ')} vs ${cmpB.join(' ')}`;document.getElementById('cmp-tbody').innerHTML=rows.join('');const tot=wa+wb,bpct=Math.round(wb/tot*100);const v=document.getElementById('cmp-verdict');if(bpct>55)v.innerHTML=`<strong>Conclusão:</strong> B tem vantagem clara (~${bpct}% de vitórias em 200 rondas).`;else if(bpct<45)v.innerHTML=`<strong>Conclusão:</strong> A tem vantagem (~${100-bpct}% de vitórias em 200 rondas).`;else v.innerHTML=`<strong>Conclusão:</strong> Jogo equilibrado — frequências próximas de 50%.`;document.getElementById('cmp-result').style.display='block';}
 
-// init last3 displays
+function cmpToggle(pl,i){ const arr=pl==='a'?cmpA:cmpB; const c=arr[i]==='?'?0:arr[i]==='C'?1:2; arr[i]=FACES[(c+1)%3]; setBtn(document.getElementById('c'+pl+i),arr[i]); document.getElementById('cmp-run').disabled=cmpA.includes('?')||cmpB.includes('?')||cmpA.join('')===cmpB.join(''); }
+
+function simRound(a,b){ const hist=[]; while(true){ hist.push(Math.random()<.5?'C':'N'); if(hist.length>=3){ const l=hist.slice(-3).join(''),ak=a.join(''),bk=b.join(''); if(l===ak&&l===bk)return'tie'; if(l===ak)return'a'; if(l===bk)return'b'; } } }
+
+function cmpRun(){
+  const N=[10,20,50,100,200]; let wa=0,wb=0; const rows=[];
+  N.forEach(target=>{
+    while(wa+wb<target){ const r=simRound(cmpA,cmpB); if(r==='a')wa++; else if(r==='b')wb++; }
+    const tot=wa+wb;
+    rows.push(`<tr><td>${tot}</td><td>${wa}</td><td>${wb}</td><td>${Math.round(wa/tot*100)}%</td><td>${Math.round(wb/tot*100)}%</td><td>${wb>wa?'<span class="badge badge-win">B vence</span>':wa>wb?'<span class="badge badge-lose">A vence</span>':'<span class="badge badge-eq">Empate</span>'}</td></tr>`);
+  });
+  document.getElementById('cmp-title').textContent=`${cmpA.join(' ')} vs ${cmpB.join(' ')}`;
+  document.getElementById('cmp-tbody').innerHTML=rows.join('');
+  const tot=wa+wb,bpct=Math.round(wb/tot*100);
+  const v=document.getElementById('cmp-verdict');
+  if(bpct>55)      v.innerHTML=`<strong>📌 Conclusão:</strong> B tem vantagem clara (~${bpct}% de vitórias em 200 rondas).`;
+  else if(bpct<45) v.innerHTML=`<strong>📌 Conclusão:</strong> A tem vantagem (~${100-bpct}% de vitórias em 200 rondas).`;
+  else             v.innerHTML=`<strong>📌 Conclusão:</strong> Jogo equilibrado — frequências próximas de 50%.`;
+  document.getElementById('cmp-result').style.display='block';
+}
+
 renderLast3('jg-last3',[]);
 renderLast3('inv-last3',[]);
 </script>
+</body>
+</html>
