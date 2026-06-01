@@ -461,7 +461,7 @@
 <div id="page-cmp" class="page">
 
   <div class="box">
-    <div class="box-title"><span>🔢</span> Simula 200 rondas</div>
+    <div class="box-title"><span>🔢</span> Simula 5000 rondas</div>
     <p style="font-size:13px;color:var(--muted);font-weight:600;margin-bottom:14px">Compara qualquer par de sequências com uma simulação rápida</p>
 
     <div style="margin-bottom:12px">
@@ -482,7 +482,7 @@
       </div>
     </div>
 
-    <button class="btn btn-primary" onclick="cmpRun()" id="cmp-run" disabled>Simular 200 rondas 🚀</button>
+    <button class="btn btn-primary" onclick="cmpRun()" id="cmp-run" disabled>Simular 5000 rondas 🚀</button>
   </div>
 
   <div id="cmp-result" style="display:none" class="box">
@@ -593,7 +593,7 @@ function jReset(){
 
 // ══ MODO INVESTIGAÇÃO ══
 let invA=['?','?','?'],invB=['?','?','?'],invHist=[],invOver=false,invAI2=null,invW={a:0,b:0},invRndN=0,invSnaps=[];
-const SNAP_AT=[10,20,30,40,50,100,200];
+const SNAP_AT=[10,20,30,40,50,1000,5000];
 
 function invToggle(pl,i){ const arr=pl==='a'?invA:invB; const c=arr[i]==='?'?0:arr[i]==='C'?1:2; arr[i]=FACES[(c+1)%3]; setBtn(document.getElementById('i'+pl+i),arr[i]); document.getElementById('inv-start').disabled=invA.includes('?')||invB.includes('?')||invA.join('')===invB.join(''); }
 
@@ -678,7 +678,7 @@ function cmpToggle(pl,i){ const arr=pl==='a'?cmpA:cmpB; const c=arr[i]==='?'?0:a
 function simRound(a,b){ const hist=[]; while(true){ hist.push(Math.random()<.5?'C':'N'); if(hist.length>=3){ const l=hist.slice(-3).join(''),ak=a.join(''),bk=b.join(''); if(l===ak&&l===bk)return'tie'; if(l===ak)return'a'; if(l===bk)return'b'; } } }
 
 function cmpRun(){
-  const N=[10,20,50,100,200]; let wa=0,wb=0; const rows=[];
+  const N=[10,20,50,1000,5000]; let wa=0,wb=0; const rows=[];
   N.forEach(target=>{
     while(wa+wb<target){ const r=simRound(cmpA,cmpB); if(r==='a')wa++; else if(r==='b')wb++; }
     const tot=wa+wb;
@@ -688,8 +688,8 @@ function cmpRun(){
   document.getElementById('cmp-tbody').innerHTML=rows.join('');
   const tot=wa+wb,bpct=Math.round(wb/tot*100);
   const v=document.getElementById('cmp-verdict');
-  if(bpct>55)      v.innerHTML=`<strong>📌 Conclusão:</strong> B tem vantagem clara (~${bpct}% de vitórias em 200 rondas).`;
-  else if(bpct<45) v.innerHTML=`<strong>📌 Conclusão:</strong> A tem vantagem (~${100-bpct}% de vitórias em 200 rondas).`;
+  if(bpct>55)      v.innerHTML=`<strong>📌 Conclusão:</strong> B tem vantagem clara (~${bpct}% de vitórias em 5000 rondas).`;
+  else if(bpct<45) v.innerHTML=`<strong>📌 Conclusão:</strong> A tem vantagem (~${100-bpct}% de vitórias em 5000 rondas).`;
   else             v.innerHTML=`<strong>📌 Conclusão:</strong> Jogo equilibrado — frequências próximas de 50%.`;
   document.getElementById('cmp-result').style.display='block';
 }
