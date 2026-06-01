@@ -241,7 +241,7 @@
 <!-- SVG symbols for coin faces -->
 <svg width="0" height="0" style="position:absolute">
 <defs>
-  <symbol id="face-C" viewBox="0 0 40 40">
+  <symbol id="face-E" viewBox="0 0 40 40">
     <circle cx="20" cy="20" r="20" fill="#F5E6B0"/>
     <circle cx="20" cy="20" r="18" fill="#F0D060"/>
     <circle cx="20" cy="20" r="15" fill="#E8C832"/>
@@ -292,8 +292,8 @@
   <!-- Legenda -->
   <div class="legend">
     <div class="legend-item">
-      <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;border:2.5px solid #B8860B;flex-shrink:0"><svg width="30" height="30"><use href="#face-C"/></svg></div>
-      <span><strong>C</strong> — Face comum (€)</span>
+      <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;border:2.5px solid #B8860B;flex-shrink:0"><svg width="30" height="30"><use href="#face-E"/></svg></div>
+      <span><strong>E</strong> — Face europeia (€)</span>
     </div>
     <div class="legend-item">
       <div style="width:30px;height:30px;border-radius:50%;overflow:hidden;border:2.5px solid #006600;flex-shrink:0"><svg width="30" height="30"><use href="#face-N"/></svg></div>
@@ -304,7 +304,7 @@
   <!-- Fase 1: escolha -->
   <div id="jg-choose" class="box">
     <div class="box-title"><span>1️⃣</span> Escolhe a tua sequência</div>
-    <p style="font-size:13px;color:var(--muted);font-weight:600;margin-bottom:12px">Toca em cada moeda para a alternar entre C e N</p>
+    <p style="font-size:13px;color:var(--muted);font-weight:600;margin-bottom:12px">Toca em cada moeda para a alternar entre E e N</p>
     <div class="seq-row" style="margin-bottom:8px">
       <button class="seq-btn" id="jb0" onclick="jToggle(0)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
       <button class="seq-btn" id="jb1" onclick="jToggle(1)"><span style="font-size:12px;color:var(--muted);font-weight:700">?</span></button>
@@ -500,10 +500,10 @@
 </div>
 
 <script>
-const OPT  = {'CCN':'NCC','CNC':'CCN','CNN':'CCN','NCC':'NNC','NCN':'NNC','NNC':'NNN','NNN':'NNC','CCC':'NCC'};
-const PROB = {'CCN_NCC':75,'CNC_CCN':66,'CNN_CCN':75,'NCC_NNC':66,'NCN_NNC':66,'NNC_NNN':66,'NNN_NNC':75,'CCC_NCC':75};
-const FACES = ['?','C','N'];
-const SYM   = {C:'face-C', N:'face-N'};
+const OPT  = {'EEN':'NEE','ENE':'EEN','ENN':'EEN','NEE':'NNE','NEN':'NNE','NNE':'NNN','NNN':'NNE','EEE':'NEE'};
+const PROB = {'EEN_NEE':75,'ENE_EEN':66,'ENN_EEN':75,'NEE_NNE':66,'NEN_NNE':66,'NNE_NNN':66,'NNN_NNE':75,'EEE_NEE':75};
+const FACES = ['?','E','N'];
+const SYM   = {E:'face-E', N:'face-N'};
 
 function coinSVG(v, sz) {
   sz = sz || 40;
@@ -531,10 +531,10 @@ function setMode(m) {
 // ══ MODO JOGO ══
 let jSeq=['?','?','?'], jComp=[], jHist=[], jOver=false, jAI=null, jW={p:0,c:0}, jTot=0;
 
-function jToggle(i){ const c=jSeq[i]==='?'?0:jSeq[i]==='C'?1:2; jSeq[i]=FACES[(c+1)%3]; setBtn(document.getElementById('jb'+i),jSeq[i]); document.getElementById('jconfirm').disabled=jSeq.includes('?'); }
+function jToggle(i){ const c=jSeq[i]==='?'?0:jSeq[i]==='E'?1:2; jSeq[i]=FACES[(c+1)%3]; setBtn(document.getElementById('jb'+i),jSeq[i]); document.getElementById('jconfirm').disabled=jSeq.includes('?'); }
 
 function jConfirm(){
-  const k=jSeq.join(''); jComp=(OPT[k]||'NCC').split('');
+  const k=jSeq.join(''); jComp=(OPT[k]||'NEE').split('');
   document.getElementById('jg-choose').style.display='none';
   document.getElementById('jg-vs').style.display='block';
   document.getElementById('jg-pseq').innerHTML=jSeq.map(c=>coinSVG(c,40)).join('');
@@ -564,7 +564,7 @@ function jEndGame(r){
 
 function jToss(){
   if(jOver)return;
-  const c=Math.random()<.5?'C':'N';
+  const c=Math.random()<.5?'E':'N';
   jHist.push(c); jTot++;
   document.getElementById('jg-tot').textContent=jTot;
   document.getElementById('jg-hist').innerHTML=jHist.map(v=>coinSVG(v,26)).join('');
@@ -595,7 +595,7 @@ function jReset(){
 let invA=['?','?','?'],invB=['?','?','?'],invHist=[],invOver=false,invAI2=null,invW={a:0,b:0},invRndN=0,invSnaps=[];
 const SNAP_AT=[10,20,30,40,50,1000,5000];
 
-function invToggle(pl,i){ const arr=pl==='a'?invA:invB; const c=arr[i]==='?'?0:arr[i]==='C'?1:2; arr[i]=FACES[(c+1)%3]; setBtn(document.getElementById('i'+pl+i),arr[i]); document.getElementById('inv-start').disabled=invA.includes('?')||invB.includes('?')||invA.join('')===invB.join(''); }
+function invToggle(pl,i){ const arr=pl==='a'?invA:invB; const c=arr[i]==='?'?0:arr[i]==='E'?1:2; arr[i]=FACES[(c+1)%3]; setBtn(document.getElementById('i'+pl+i),arr[i]); document.getElementById('inv-start').disabled=invA.includes('?')||invB.includes('?')||invA.join('')===invB.join(''); }
 
 function invStart(){ document.getElementById('inv-run').style.display='block'; invHist=[]; invOver=false; document.getElementById('inv-hist').innerHTML=''; renderLast3('inv-last3',[]); updateInvStats(); }
 
@@ -635,7 +635,7 @@ function invEndRound(r){
 
 function invToss(){
   if(invOver)return;
-  const c=Math.random()<.5?'C':'N';
+  const c=Math.random()<.5?'E':'N';
   invHist.push(c);
   document.getElementById('inv-hist').innerHTML=invHist.map(v=>coinSVG(v,26)).join('');
   renderLast3('inv-last3',invHist);
@@ -673,9 +673,9 @@ function invReset(){
 // ══ COMPARADOR ══
 let cmpA=['?','?','?'],cmpB=['?','?','?'];
 
-function cmpToggle(pl,i){ const arr=pl==='a'?cmpA:cmpB; const c=arr[i]==='?'?0:arr[i]==='C'?1:2; arr[i]=FACES[(c+1)%3]; setBtn(document.getElementById('c'+pl+i),arr[i]); document.getElementById('cmp-run').disabled=cmpA.includes('?')||cmpB.includes('?')||cmpA.join('')===cmpB.join(''); }
+function cmpToggle(pl,i){ const arr=pl==='a'?cmpA:cmpB; const c=arr[i]==='?'?0:arr[i]==='E'?1:2; arr[i]=FACES[(c+1)%3]; setBtn(document.getElementById('c'+pl+i),arr[i]); document.getElementById('cmp-run').disabled=cmpA.includes('?')||cmpB.includes('?')||cmpA.join('')===cmpB.join(''); }
 
-function simRound(a,b){ const hist=[]; while(true){ hist.push(Math.random()<.5?'C':'N'); if(hist.length>=3){ const l=hist.slice(-3).join(''),ak=a.join(''),bk=b.join(''); if(l===ak&&l===bk)return'tie'; if(l===ak)return'a'; if(l===bk)return'b'; } } }
+function simRound(a,b){ const hist=[]; while(true){ hist.push(Math.random()<.5?'E':'N'); if(hist.length>=3){ const l=hist.slice(-3).join(''),ak=a.join(''),bk=b.join(''); if(l===ak&&l===bk)return'tie'; if(l===ak)return'a'; if(l===bk)return'b'; } } }
 
 function cmpRun(){
   const N=[10,20,50,1000,5000]; let wa=0,wb=0; const rows=[];
